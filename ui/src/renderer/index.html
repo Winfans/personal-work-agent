@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <title>Electron TypeScript App</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; }
+      main { padding: 2rem; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Electron + TypeScript</h1>
+      <p>应用已成功启动，当前平台：<strong id="platform">loading…</strong></p>
+    </main>
+    <script src="../renderer.js"></script>
+  </body>
+</html>

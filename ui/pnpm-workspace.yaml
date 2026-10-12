@@ -1,0 +1,3 @@
+allowBuilds:
+  # Electron is installed separately by the resumable mirror script.
+  electron: false
