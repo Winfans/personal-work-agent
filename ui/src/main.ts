@@ -3,10 +3,12 @@ import path from "node:path";
 
 const createWindow = (): void => {
   const window = new BrowserWindow({
-    width: 960,
-    height: 640,
-    minWidth: 640,
-    minHeight: 480,
+    width: 1180,
+    height: 780,
+    minWidth: 760,
+    minHeight: 560,
+    titleBarStyle: "hiddenInset",
+    backgroundColor: "#fbfaf7",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
