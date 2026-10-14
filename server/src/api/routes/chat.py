@@ -3,11 +3,13 @@
 from collections.abc import AsyncIterator
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from src.schemas.chat import TextChatRequest
-from src.services.chat import ChatService, get_chat_service
+from src.schemas.agent import AgentRequest
+from src.services.agent import AgentService
+from src.api.routes.agent import get_configured_agent_service
 
 router = APIRouter()
 
@@ -16,30 +18,21 @@ def _event(event_type: str, **payload: object) -> bytes:
     return (json.dumps({"type": event_type, **payload}, ensure_ascii=False) + "\n").encode()
 
 
-def get_configured_chat_service() -> ChatService:
-    try:
-        return get_chat_service()
-    except RuntimeError as error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(error),
-        ) from error
-
-
 @router.post("/text", response_class=StreamingResponse)
 async def text_chat(
     request: TextChatRequest,
-    service: ChatService = Depends(get_configured_chat_service),
+    service: AgentService = Depends(get_configured_agent_service),
 ) -> StreamingResponse:
     async def stream() -> AsyncIterator[bytes]:
-        yield _event("start", model=service.model)
         try:
-            async for content in service.stream_text(request):
-                yield _event("delta", content=content)
+            agent_request = AgentRequest(
+                messages=request.messages,
+                temperature=request.temperature,
+            )
+            async for event in service.stream(agent_request):
+                yield (json.dumps(event, ensure_ascii=False) + "\n").encode()
         except Exception as error:
             yield _event("error", message=str(error))
-            return
-        yield _event("done")
 
     return StreamingResponse(
         stream(),
@@ -49,9 +42,3 @@ async def text_chat(
             "X-Accel-Buffering": "no",
         },
     )
-
-
-@router.post("/text/check", include_in_schema=False)
-async def check_chat_configuration() -> dict[str, str]:
-    service = get_configured_chat_service()
-    return {"status": "ok", "model": service.model}

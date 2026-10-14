@@ -31,16 +31,36 @@ class ChatService:
         return self._model
 
     async def stream_text(self, request: TextChatRequest) -> AsyncIterator[str]:
+        async for content in self.stream_messages(request.messages, request.temperature):
+            yield content
+
+    async def stream_messages(
+        self,
+        messages: list[ChatMessage],
+        temperature: float,
+        rag_context: str | None = None,
+    ) -> AsyncIterator[str]:
         chat_model = ChatOpenAI(
             api_key=self._api_key,
             base_url=self._base_url,
             model=self._model,
-            temperature=request.temperature,
+            temperature=temperature,
             streaming=True,
         )
-        messages = [_to_langchain_message(message) for message in request.messages]
+        langchain_messages = [_to_langchain_message(message) for message in messages]
+        if rag_context:
+            langchain_messages.insert(
+                0,
+                SystemMessage(
+                    content=(
+                        "Answer using the retrieved knowledge below. Clearly say when the retrieved "
+                        "knowledge is insufficient; do not invent private facts.\n\n"
+                        f"Retrieved knowledge:\n{rag_context}"
+                    )
+                ),
+            )
 
-        async for chunk in chat_model.astream(messages):
+        async for chunk in chat_model.astream(langchain_messages):
             content = chunk.content
             if isinstance(content, str) and content:
                 yield content

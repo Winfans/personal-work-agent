@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import api_router
 from src.api.routes.chat import router as chat_router
+from src.api.routes.agent import router as agent_router
 from src.config import settings
 
 
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type"],
     )
     application.include_router(api_router, prefix="/api/v1")
+    application.include_router(agent_router, prefix="/agent", tags=["agent"])
     application.include_router(chat_router, prefix="/chat", tags=["chat"])
     return application
 

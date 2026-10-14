@@ -2,13 +2,16 @@ type Role = "user" | "assistant";
 
 interface ChatMessage { role: Role; content: string; }
 interface StreamEvent {
-  type: "start" | "delta" | "done" | "error";
+  type: "start" | "route" | "retrieval" | "delta" | "done" | "error";
   model?: string;
   content?: string;
   message?: string;
+  route?: "general_chat" | "rag_chat";
+  confidence?: number;
+  count?: number;
 }
 
-const API_URL = "http://127.0.0.1:8000/chat/text";
+const API_URL = "http://127.0.0.1:8000/agent/run";
 const messages: ChatMessage[] = [];
 const messagesElement = document.querySelector<HTMLElement>("#messages");
 const emptyState = document.querySelector<HTMLElement>("#empty-state");
@@ -51,8 +54,17 @@ const consumeLine = (line: string, assistantBody: HTMLElement): void => {
   if (!line.trim()) return;
   const event = JSON.parse(line) as StreamEvent;
   if (event.type === "delta" && event.content) {
+    statusLabel.textContent = "DeepSeek 正在回答…";
     assistantBody.textContent += event.content;
     scrollToBottom();
+  }
+  if (event.type === "route") {
+    statusLabel.textContent = event.route === "rag_chat"
+      ? "Jev 已选择知识库问答，正在召回…"
+      : "Jev 已选择普通聊天，正在生成…";
+  }
+  if (event.type === "retrieval") {
+    statusLabel.textContent = `百炼已召回 ${event.count ?? 0} 条知识，正在生成…`;
   }
   if (event.type === "error") throw new Error(event.message ?? "模型请求失败");
 };

@@ -25,6 +25,13 @@ class Settings:
         "https://ws-rco9ybd863lyd687.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
     )
     bailian_model: str = os.getenv("BAILIAN_MODEL", "deepseek-v4.1-flash")
+    bailian_rag_base_url: str | None = os.getenv("BAILIAN_RAG_BASE_URL")
+    bailian_rag_index_id: str | None = os.getenv("BAILIAN_RAG_INDEX_ID")
+    bailian_rag_top_k: int = int(os.getenv("BAILIAN_RAG_TOP_K", "5"))
+    typesafe_api_key: str | None = os.getenv("TYPESAFE_API_KEY")
+    jev_base_url: str = os.getenv("JEV_BASE_URL", "https://api.typesafe.ai")
+    jev_model: str = os.getenv("JEV_MODEL", "jev-latest")
+    jev_timeout_seconds: float = float(os.getenv("JEV_TIMEOUT_SECONDS", "10"))
 
 
 settings = Settings()
