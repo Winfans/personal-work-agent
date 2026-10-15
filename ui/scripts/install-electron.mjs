@@ -27,26 +27,43 @@ const distPath = join(electronDirectory, "dist");
 const executablePath = platformName === "darwin"
   ? "Electron.app/Contents/MacOS/Electron"
   : "electron";
+const executable = join(distPath, executablePath);
 
 mkdirSync(cacheDirectory, { recursive: true });
+
+if (existsSync(executable)) {
+  writeFileSync(join(electronDirectory, "path.txt"), executablePath);
+  console.log(`Electron ${version} is already installed.`);
+  process.exit(0);
+}
 
 console.log(`Downloading Electron ${version} from:`);
 console.log(url);
 console.log("Interrupted downloads will resume on the next run.");
 
-const download = spawnSync("curl", [
-  "--fail",
-  "--location",
-  "--continue-at", "-",
-  "--retry", "20",
-  "--retry-all-errors",
-  "--connect-timeout", "20",
-  "--output", archivePath,
-  url,
-], { stdio: "inherit" });
+const cachedArchive = existsSync(archivePath) && spawnSync(
+  "unzip",
+  ["-tq", archivePath],
+  { stdio: "ignore" },
+).status === 0;
 
-if (download.status !== 0) {
-  process.exit(download.status ?? 1);
+if (cachedArchive) {
+  console.log(`Using verified cached archive: ${archivePath}`);
+} else {
+  const download = spawnSync("curl", [
+    "--fail",
+    "--location",
+    "--continue-at", "-",
+    "--retry", "20",
+    "--retry-all-errors",
+    "--connect-timeout", "20",
+    "--output", archivePath,
+    url,
+  ], { stdio: "inherit" });
+
+  if (download.status !== 0) {
+    process.exit(download.status ?? 1);
+  }
 }
 
 rmSync(distPath, { recursive: true, force: true });
@@ -60,11 +77,9 @@ if (extract.status !== 0) {
   process.exit(extract.status ?? 1);
 }
 
-writeFileSync(join(electronDirectory, "path.txt"), executablePath);
-
-const executable = join(distPath, executablePath);
 if (!existsSync(executable)) {
   throw new Error(`Electron executable was not found at ${executable}`);
 }
 
+writeFileSync(join(electronDirectory, "path.txt"), executablePath);
 console.log(`Electron ${version} installed successfully.`);

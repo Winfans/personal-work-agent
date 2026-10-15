@@ -2,18 +2,32 @@
   "name": "personal-work-agent-ui",
   "version": "0.1.0",
   "private": true,
-  "description": "A minimal Electron application written in TypeScript.",
-  "main": "dist/main.js",
+  "description": "Electron desktop client with a React and Vite renderer.",
+  "main": "dist/electron/main.js",
   "scripts": {
-    "build": "tsc && node scripts/copy-static.mjs",
-    "dev": "tsc --watch",
+    "build": "pnpm run build:electron && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"pnpm run dev:electron\"",
+    "dev:electron": "wait-on http://127.0.0.1:5173 && pnpm run build:electron && pnpm run electron:install && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
     "electron:install": "node scripts/install-electron.mjs",
-    "start": "pnpm run build && electron .",
-    "typecheck": "tsc --noEmit"
+    "postinstall": "pnpm run electron:install",
+    "start": "pnpm run build && pnpm run electron:install && electron .",
+    "typecheck": "tsc -p tsconfig.renderer.json --noEmit && tsc -p tsconfig.electron.json --noEmit"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
-    "electron": "^38.0.0",
-    "typescript": "^5.9.0"
+    "@types/node": "24.0.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@vitejs/plugin-react": "5.0.0",
+    "concurrently": "9.2.0",
+    "cross-env": "10.1.0",
+    "electron": "38.8.6",
+    "typescript": "5.9.3",
+    "vite": "7.1.0",
+    "wait-on": "9.0.0"
   }
 }

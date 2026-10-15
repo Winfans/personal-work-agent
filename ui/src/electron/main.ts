@@ -12,11 +12,17 @@ const createWindow = (): void => {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
-      nodeIntegration: false
-    }
+      nodeIntegration: false,
+      sandbox: true,
+    },
   });
 
-  void window.loadFile(path.join(__dirname, "renderer", "index.html"));
+  const developmentUrl = process.env.VITE_DEV_SERVER_URL;
+  if (developmentUrl) {
+    void window.loadURL(developmentUrl);
+  } else {
+    void window.loadFile(path.join(__dirname, "../renderer/index.html"));
+  }
 };
 
 void app.whenReady().then(() => {

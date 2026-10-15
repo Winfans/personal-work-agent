@@ -1,3 +1,8 @@
 allowBuilds:
   # Electron is installed separately by the resumable mirror script.
   electron: false
+  esbuild: true
+
+# Avoid resolving packages immediately after publication. This keeps the
+# lockfile compatible with pnpm's supply-chain freshness verification.
+minimumReleaseAge: 1440
