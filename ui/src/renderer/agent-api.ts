@@ -28,7 +28,8 @@ export const streamAgentReply = async (
   });
 
   if (!response.ok) {
-    throw new Error(`服务端返回 ${response.status}: ${await response.text()}`);
+    const body = await response.json().catch(() => null) as { message?: string } | null;
+    throw new Error(body?.message ?? `服务端返回 ${response.status}`);
   }
   if (!response.body) throw new Error("浏览器未提供流式响应体");
 

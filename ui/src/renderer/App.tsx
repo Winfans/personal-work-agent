@@ -1,6 +1,7 @@
 import { FormEvent, KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { streamAgentReply } from "./agent-api";
+import NotesPage from "./NotesPage";
 import type { AgentMessage, ChatMessage, StreamEvent } from "./types";
 
 const IDLE_STATUS = "DeepSeek v4.1 · Streamable HTTP";
@@ -30,6 +31,7 @@ const statusForEvent = (event: StreamEvent): string | null => {
 };
 
 export default function App() {
+  const [activeView, setActiveView] = useState<"chat" | "notes">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -121,6 +123,7 @@ export default function App() {
   };
 
   const startNewChat = (): void => {
+    setActiveView("chat");
     requestRef.current?.abort();
     requestRef.current = null;
     setMessages([]);
@@ -144,8 +147,27 @@ export default function App() {
           <span className="shortcut">⌘N</span>
         </button>
         <div className="sidebar__section">
+          <span className="sidebar__label">工作台</span>
+          <button
+            className={`history-item${activeView === "chat" ? " history-item--active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("chat")}
+          >
+            <span className="history-item__icon">◇</span>
+            <span>对话</span>
+          </button>
+          <button
+            className={`history-item${activeView === "notes" ? " history-item--active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("notes")}
+          >
+            <span className="history-item__icon">▤</span>
+            <span>笔记</span>
+          </button>
+        </div>
+        <div className="sidebar__section">
           <span className="sidebar__label">今天</span>
-          <button className="history-item history-item--active" type="button">
+          <button className="history-item" type="button" onClick={() => setActiveView("chat")}>
             <span className="history-item__icon">◇</span>
             <span>{conversationTitle}</span>
           </button>
@@ -157,7 +179,7 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="chat">
+      {activeView === "notes" ? <NotesPage /> : <main className="chat">
         <header className="chat__header">
           <div>
             <strong>Personal Work Agent</strong>
@@ -227,7 +249,7 @@ export default function App() {
             </div>
           </form>
         </footer>
-      </main>
+      </main>}
     </div>
   );
 }

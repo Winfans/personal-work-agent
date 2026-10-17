@@ -32,6 +32,12 @@ class Settings:
     jev_base_url: str = os.getenv("JEV_BASE_URL", "https://api.typesafe.ai")
     jev_model: str = os.getenv("JEV_MODEL", "jev-latest")
     jev_timeout_seconds: float = float(os.getenv("JEV_TIMEOUT_SECONDS", "10"))
+    mysql_host: str = os.getenv("MYSQL_HOST", "127.0.0.1")
+    mysql_port: int = int(os.getenv("MYSQL_PORT", "3306"))
+    mysql_user: str = os.getenv("MYSQL_USER", "root")
+    mysql_password: str = os.getenv("MYSQL_PASSWORD", "personal-workbench-dev")
+    mysql_database: str = os.getenv("MYSQL_DATABASE", "personal_workbench")
+    mysql_echo: bool = _as_bool(os.getenv("MYSQL_ECHO", "false"))
 
 
 settings = Settings()

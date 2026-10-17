@@ -1,5 +1,11 @@
 export type Role = "user" | "assistant";
 
+export interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
 export interface ChatMessage {
   id: string;
   role: Role;

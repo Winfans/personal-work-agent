@@ -5,6 +5,7 @@ Personal Work Agent 桌面客户端：
 - Electron 主进程和安全 preload 使用 TypeScript
 - Renderer 使用 React 19 + Vite
 - 通过 NDJSON Streamable HTTP 调用 `/agent/run`
+- 通过 `/api/v1/notes` 管理远程 MySQL 笔记
 - 开发模式支持 Vite 热更新
 - 生产模式输出到 `dist/electron` 和 `dist/renderer`
 
@@ -52,3 +53,14 @@ src/renderer/       React 组件、样式与流式 API 客户端
 dist/electron/      Electron TypeScript 编译结果
 dist/renderer/      Vite 生产构建结果
 ```
+
+## 笔记工作台
+
+启动 Server 和 UI 后，点击左侧“工作台 → 笔记”即可：
+
+- 加载和选择笔记
+- 新建笔记
+- 编辑标题与正文并保存
+- 删除笔记
+
+笔记数据由 Server 的 `/api/v1/notes` CRUD 接口读写，最终存储在 Server 配置的 MySQL 实例中。
