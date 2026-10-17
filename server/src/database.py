@@ -61,6 +61,7 @@ async def bootstrap_database() -> None:
 
     # Import model modules before create_all so their tables are registered.
     from src.models import note as _note  # noqa: F401
+    from src.models import conversation as _conversation  # noqa: F401
 
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)

@@ -4,8 +4,9 @@ Personal Work Agent 桌面客户端：
 
 - Electron 主进程和安全 preload 使用 TypeScript
 - Renderer 使用 React 19 + Vite
-- 通过 NDJSON Streamable HTTP 调用 `/agent/run`
+- 通过 NDJSON Streamable HTTP 调用持久化会话接口，兼容 `/agent/run` 客户端仍保留
 - 通过 `/api/v1/notes` 管理远程 MySQL 笔记
+- 通过 `/api/v1/conversations` 查看、切换和继续多个聊天会话
 - 开发模式支持 Vite 热更新
 - 生产模式输出到 `dist/electron` 和 `dist/renderer`
 

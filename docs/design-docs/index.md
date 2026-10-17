@@ -6,6 +6,7 @@
 | 0002 | [Agent 的 NDJSON 流协议](0002-agent-stream-protocol.md) | 已采纳 | 是 | 2026-10-16 |
 | 0003 | [MySQL 笔记持久化](0003-notes-persistence.md) | 提议中；工作区已有实现 | 部分核验 | 2026-10-16 |
 | 0004 | [普通 JSON 响应结构](0004-json-response-envelope.md) | 已采纳 | 已通过后端测试 | 2026-10-16 |
+| 0005 | [MySQL 会话与消息持久化](0005-chat-history-persistence.md) | 已采纳；待 MySQL 验证 | 部分核验 | 2026-10-17 |
 
 跨组件设计前先阅读[核心原则](core-beliefs.md)。若决策改变系统边界、公共契约、数据持久性、安全、可靠性，或引入难以撤销的依赖，应新增记录。
 

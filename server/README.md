@@ -7,7 +7,7 @@ Personal Work Agent 的后端和 Agent 服务。当前包含：
 - Agent 请求入口与独立服务层
 - TypeSafe Jev 对普通聊天与 RAG 聊天进行路由
 - 阿里云百炼知识库检索
-- MySQL 自动建库建表与笔记 CRUD
+- MySQL 自动建库建表、笔记 CRUD 和多会话聊天历史
 - 基于 LangChain 和阿里云百炼 DeepSeek v4.1 的流式文本聊天
 - 基于环境变量的运行配置
 - 基础接口测试
@@ -48,6 +48,16 @@ uv run uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
 删除笔记成功返回 HTTP 200，响应为 `{"code":0,"message":"OK","data":null}`。OpenAPI 文档本身不使用此业务响应结构。
 
 `/agent/run` 和 `/chat/text` 的成功响应仍是 NDJSON 事件流；请求校验或依赖检查在流开始前失败时，返回上述 JSON 错误结构。
+
+## 多会话聊天历史
+
+- `POST /api/v1/conversations`：创建会话，JSON 请求如 `{"title":"今天的计划"}`。
+- `GET /api/v1/conversations?limit=30&before_id=...`：按最近更新时间列出会话。
+- `GET /api/v1/conversations/{id}`：读取会话摘要。
+- `GET /api/v1/conversations/{id}/messages?limit=50&before_id=...`：读取一页消息，返回顺序为旧到新。
+- `POST /api/v1/conversations/{id}/run`：发送 `{"message":"你好"}`，返回 NDJSON 流并保存本轮完整消息。
+
+JSON 接口遵守统一响应结构。流失败时已接收的用户消息保留，未完成助手回答不入库。`/agent/run` 和 `/chat/text` 不会自动保存历史。
 
 ## Agent 流式接口
 

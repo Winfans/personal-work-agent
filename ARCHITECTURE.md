@@ -12,8 +12,8 @@ React 渲染进程 ── HTTP/NDJSON ──► FastAPI 路由
                                       │
                    ┌──────────────────┼──────────────────┐
                    ▼                  ▼                  ▼
-               Agent 领域          笔记领域           系统领域
-            路由 → 检索 → 生成      CRUD 服务          健康/配置
+               Agent 领域          持久化领域          系统领域
+            路由 → 检索 → 生成   笔记 / 会话 / 消息     健康/配置
                    │                  │
                    ▼                  ▼
                外部服务       SQLAlchemy → MySQL
@@ -40,7 +40,7 @@ React 渲染进程 ── HTTP/NDJSON ──► FastAPI 路由
 
 - `ui/src/electron/main.ts`：窗口和 Electron 生命周期。
 - `ui/src/electron/preload.ts`：向渲染进程提供最小桥接接口。
-- `ui/src/renderer/App.tsx`：聊天状态与主导航。
+- `ui/src/renderer/App.tsx`：聊天状态、历史会话与主导航。
 - `ui/src/renderer/NotesPage.tsx`：笔记列表与编辑状态。
 - `ui/src/renderer/*-api.ts`：后端 HTTP 请求和流解析。
 
@@ -56,6 +56,8 @@ React 渲染进程 ── HTTP/NDJSON ──► FastAPI 路由
 - `server/src/services/chat.py`：模型生成。
 
 流式契约为 `start → route → retrieval? → delta* → done`，中途失败产生 `error`。详见[聊天产品规格](docs/product-specs/chat.md)和[设计记录 0002](docs/design-docs/0002-agent-stream-protocol.md)。
+
+历史会话由 `/api/v1/conversations` 的 JSON 接口提供，消息按页加载；`/{id}/run` 复用 Agent 流并保存用户消息和完成的助手回答。原 `/agent/run` 保持无持久化的兼容入口。完整历史在 MySQL，推理上下文只取最近 100 条；详见[设计记录 0005](docs/design-docs/0005-chat-history-persistence.md)。
 
 普通 JSON 业务接口使用统一的 `code`、`message`、`data` 响应结构；流开始前的错误也遵循此结构。NDJSON 事件流保持独立协议，详见[设计记录 0004](docs/design-docs/0004-json-response-envelope.md)。
 
@@ -100,6 +102,6 @@ MySQL、外部服务及桌面交互需要单独的集成验证，不能依据单
 ## 已知缺口
 
 - 缺少依赖边界检查器和仓库级统一 `check` 命令。
-- 缺少 MySQL schema 迁移机制和会话持久化。
+- 缺少 MySQL schema 迁移机制；会话持久化尚缺真实 MySQL 运行验证。
 - 后端地址、打包、升级及凭证存储尚未产品化。
 - 外部服务降级、重试、日志脱敏、链路追踪和指标尚不完整。

@@ -1,6 +1,7 @@
 import type { AgentMessage, StreamEvent } from "./types";
 
 const API_URL = "http://127.0.0.1:8000/agent/run";
+const CONVERSATIONS_URL = "http://127.0.0.1:8000/api/v1/conversations";
 
 interface StreamHandlers {
   onEvent: (event: StreamEvent) => void;
@@ -15,15 +16,16 @@ const consumeLine = (line: string, handlers: StreamHandlers): void => {
   handlers.onEvent(event);
 };
 
-export const streamAgentReply = async (
-  messages: AgentMessage[],
+const streamRequest = async (
+  url: string,
+  body: object,
   handlers: StreamHandlers,
   signal: AbortSignal,
 ): Promise<void> => {
-  const response = await fetch(API_URL, {
+  const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, temperature: 0.6 }),
+    body: JSON.stringify(body),
     signal,
   });
 
@@ -48,3 +50,16 @@ export const streamAgentReply = async (
 
   if (buffer) consumeLine(buffer, handlers);
 };
+
+export const streamAgentReply = (
+  messages: AgentMessage[], handlers: StreamHandlers, signal: AbortSignal,
+): Promise<void> => streamRequest(API_URL, { messages, temperature: 0.6 }, handlers, signal);
+
+export const streamConversationReply = (
+  conversationId: number, message: string, handlers: StreamHandlers, signal: AbortSignal,
+): Promise<void> => streamRequest(
+  `${CONVERSATIONS_URL}/${conversationId}/run`,
+  { message, temperature: 0.6 },
+  handlers,
+  signal,
+);
